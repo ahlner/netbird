@@ -1,4 +1,4 @@
-name: Management Image
+name: Fork Images
 
 on:
   push:
@@ -6,9 +6,13 @@ on:
       - main
     paths:
       - "management/**"
+      - "combined/**"
+      - "signal/**"
+      - "relay/**"
+      - "shared/**"
       - "go.mod"
       - "go.sum"
-      - ".github/workflows/management-image.yml"
+      - ".github/workflows/fork-images.yml"
   workflow_dispatch:
 
 permissions:
@@ -22,6 +26,14 @@ concurrency:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: netbird-management
+            dockerfile: management/Dockerfile.fork
+          - image: netbird-server
+            dockerfile: combined/Dockerfile.fork
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -43,12 +55,12 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
-          file: management/Dockerfile.fork
+          file: ${{ matrix.dockerfile }}
           platforms: linux/amd64
           push: true
           provenance: false
           tags: |
-            ghcr.io/${{ github.repository_owner }}/netbird-management:latest
-            ghcr.io/${{ github.repository_owner }}/netbird-management:sha-${{ env.SHORT_SHA }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:sha-${{ env.SHORT_SHA }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

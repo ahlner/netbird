@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: BSD-3-Clause
-
 // Package integrations mirrors the upstream management-integrations module 1:1
 // and adds the flow logger wiring on top. Surface changes upstream must fail
 // loudly at compile time rather than silently changing behavior, so every

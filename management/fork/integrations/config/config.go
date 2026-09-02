@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: BSD-3-Clause
-
 // Package config extends the sync-time NetbirdConfig with the flow logger
 // configuration for peers in the configured flow groups.
 package config

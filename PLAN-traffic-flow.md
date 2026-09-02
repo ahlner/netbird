@@ -15,7 +15,7 @@ des Management-Forks dadurch abgedeckt). Kein Upstream-PR, keine Änderung am Ag
   exitNodeCollection/dnsCollection). Agent wertet sie pro Sync aus
   (`client/internal/engine.go:1185-1219`).
 - **Blocker:** Stub-Modul `github.com/netbirdio/management-integrations/integrations`
-  (go.mod require; per `replace` auf `fork/integrations` umgeleitet).
+  (go.mod require; per `replace` auf `management/fork/integrations` umgeleitet).
   `ExtendNetBirdConfig` ist dort No-op, `extra_settings.Manager` liefert leere Settings.
 - **Aufrufstellen der Integrations-API im OSS:**
   `management/internals/shared/grpc/conversion.go:176` (+ `token_mgr.go:293`,
@@ -31,12 +31,12 @@ des Management-Forks dadurch abgedeckt). Kein Upstream-PR, keine Änderung am Ag
 
 ## Teil A: Management-Fork (in dieser Änderung umgesetzt)
 
-Eigenes Modul `fork/integrations/` mit Modulpfad
+Eigenes Modul `management/fork/integrations/` mit Modulpfad
 `github.com/netbirdio/management-integrations/integrations`, aktiviert durch genau eine
 Zeile in der Root-`go.mod`:
 
 ```
-replace github.com/netbirdio/management-integrations/integrations => ./fork/integrations
+replace github.com/netbirdio/management-integrations/integrations => ./management/fork/integrations
 ```
 
 - Spiegelt die komplette Stub-Oberfläche 1:1 (Dateilayout identisch:
@@ -97,11 +97,15 @@ das Management nur per Netzprotokoll (gRPC in, REST für Anreicherung) anspricht
   `client_test.go`), danach Labor-VM (nur Wegwerfumgebung, Agent läuft als root):
   Events kommen an, Acks drainen den Puffer, Receiver-Restart → Resend+Dedup greift,
   danach `netbird down` für sauberes Teardown.
-- `go fmt`, `make lint` auf geänderte Dateien; neue Dateien mit SPDX-Headern.
+- `go fmt`, `make lint` auf geänderte Dateien.
 
 ## Lizenz
 
-- `fork/integrations/`: BSD-3-Clause (AGPL-kompatibel), SPDX-Header pro Datei.
+- `management/fork/integrations/`: GPL-3.0 — Derivat des Upstream-Moduls, das
+  selbst GPL-3.0 ist; daher GPLv3-`LICENSE` im Modulverzeichnis, keine
+  abweichenden SPDX-Header. Kombinierbar mit dem AGPLv3-Management wie beim
+  Upstream selbst. Liegt unter `management/`, damit der interne
+  AGPL-Dependencies-Check es nicht als Fremdmodul im Top-Level scannt.
 - Management-Binary bleibt insgesamt AGPLv3; Fork ist öffentlich → §13 abgedeckt.
 - Keine Hand-Edits an generierten Dateien, keine Änderungen an OSS-Quelldateien
   außer der einen `replace`-Zeile in `go.mod`.

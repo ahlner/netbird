@@ -54,6 +54,18 @@ Teil B „Flow-Receiver" noch nicht gebaut).
   (scope je Image). Aktionen wie im Repo üblich auf SHAs gepinnt. Kein
   Docker-Hub, kein GPG, kein Tag nötig — bewusst ohne die
   Upstream-Release-Pipeline, die am Fork an fehlenden Secrets scheitert.
+- Quality-Gate vor jedem Image-Push: Unit-Tests der eingebauten Komponenten
+  laufen im selben Job vor dem Build. Beide Beine testen
+  `./management/... ./shared/management/...` (sqlite-Store, `-tags=devcert`,
+  `-exec sudo` — identisch zum Upstream-Job `Management / Unit` in
+  `golang-test-linux.yml`); das `netbird-server`-Bein zusätzlich
+  `./signal/... ./shared/signal/...` und `./relay/... ./shared/relay/...`
+  (Relay mit `-race`, wie Upstream). Bewusst als eigene Schritte statt
+  Verweis auf die Upstream-Workflows: deren Linux-Jobs scheitern am Fork am
+  Docker-Hub-Login, ein `workflow_run`-Gate würde zudem pro Upstream-Lauf
+  mehrfach triggern. Die mysql/postgres-Store-Varianten sind nicht im Gate
+  (brauchen Docker-Hub bzw. warmed-mysql — dieselbe Fork-Limitation); sqlite
+  deckt dieselben Tests ab.
 - Deployment getting-started: `NETBIRD_SERVER_IMAGE=
   ghcr.io/ahlner/netbird-server:latest` (bzw. `image:` in der compose).
 - Paket-Sichtbarkeit: ghcr-Pakete sind initial privat; beim ersten Lauf

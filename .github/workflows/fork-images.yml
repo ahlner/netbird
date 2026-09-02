@@ -38,6 +38,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
+      - name: Install Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: "go.mod"
+
+      - name: Management unit tests
+        run: |
+          CGO_ENABLED=1 CI=true NETBIRD_STORE_ENGINE=sqlite \
+          go test -tags=devcert \
+            -exec "sudo --preserve-env=CI,NETBIRD_STORE_ENGINE" \
+            -timeout 20m ./management/... ./shared/management/...
+
+      - name: Signal and relay unit tests
+        if: matrix.image == 'netbird-server'
+        run: |
+          CGO_ENABLED=1 go test -exec 'sudo' -timeout 10m -p 1 \
+            ./signal/... ./shared/signal/...
+          CGO_ENABLED=1 go test -race -exec 'sudo' -timeout 10m -p 1 \
+            ./relay/... ./shared/relay/...
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
 

@@ -7,7 +7,7 @@ weitergepflegt (siehe „Wartung"). Detailpläne pro Feature: `PLAN-*.md`.
 | # | Änderung | Status | Kern-Dateien |
 | --- | --- | --- | --- |
 | 1 | Traffic-Flow-Logging (Management-injizierte Flow-Konfig) | gemergt auf `origin/main` (`b10e53168`, PR #1) | `management/fork/integrations/`, `go.mod` |
-| 2 | Docker-Images: Management + kombinierter Server (GitHub → ghcr.io) | implementiert, uncommittet | `.github/workflows/fork-images.yml`, `management/Dockerfile.fork`, `combined/Dockerfile.fork` |
+| 2 | Docker-Images: Management + kombinierter Server (GitHub → ghcr.io) | implementiert | `.github/workflows/fork-images.yml`, `management/Dockerfile.fork`, `combined/Dockerfile.fork` |
 
 ## 1. Traffic-Flow-Logging
 
@@ -45,15 +45,22 @@ Teil B „Flow-Receiver" noch nicht gebaut).
   nicht im Build-Kontext liegt. Beide `Dockerfile.fork`-Varianten kopieren
   das Modulverzeichnis vor dem Download mit (einziger Unterschied; beim
   kombinierten inkl. Upstream-ldflags via `git describe`).
-- Workflow `.github/workflows/fork-images.yml`: push auf `main` (bei
-  Änderungen unter `management/**`, `combined/**`, `signal/**`, `relay/**`,
-  `shared/**`, `go.mod`, `go.sum`) + `workflow_dispatch`; Matrix baut beide
-  Images parallel und pusht nach
-  `ghcr.io/ahlner/netbird-management:{latest,sha-<short>}` und
-  `ghcr.io/ahlner/netbird-server:{latest,sha-<short>}`; Buildx-Cache via GHA
-  (scope je Image). Aktionen wie im Repo üblich auf SHAs gepinnt. Kein
-  Docker-Hub, kein GPG, kein Tag nötig — bewusst ohne die
-  Upstream-Release-Pipeline, die am Fork an fehlenden Secrets scheitert.
+- Workflow `.github/workflows/fork-images.yml`: push auf `main` (bei Änderungen
+  unter `management/**`, `combined/**`, `signal/**`, `relay/**`, `shared/**`,
+  `go.mod`, `go.sum`), Push eines `v*`-Tags und `workflow_dispatch`; Matrix
+  baut beide Images parallel und pusht nach
+  `ghcr.io/ahlner/netbird-management:{latest,sha-<short>,<version>}` und
+  `ghcr.io/ahlner/netbird-server:{latest,sha-<short>,<version>}` — `<version>`
+  ist der Git-Tag ohne führendes `v` (`v0.78.1-fork-1` → `0.78.1-fork-1`).
+  Der `paths`-Filter wird laut GitHub-Doku bei Tag-Pushes nicht evaluiert,
+  triggert also nur bei `main`-Pushes; Buildx-Cache via GHA (scope je Image).
+  Aktionen wie im Repo üblich auf SHAs gepinnt. Kein Docker-Hub, kein GPG —
+  bewusst ohne die Upstream-Release-Pipeline, die am Fork an fehlenden Secrets
+  scheitert; Version-Tags entstehen direkt aus Git-Tags statt über GoReleaser.
+- Fork-Releases taggen: Tag auf dem Fork-`main` setzen (z. B.
+  `v0.78.1-fork-1`), nie die bestehenden Upstream-Tags (`v0.78.1` etc.)
+  pushen — die zeigen auf Upstream-Commits ohne die Fork-Dateien
+  (`Dockerfile.fork`), der Build bricht dann ab.
 - Quality-Gate vor jedem Image-Push: Unit-Tests der eingebauten Komponenten
   laufen im selben Job vor dem Build. Beide Beine testen
   `./management/... ./shared/management/...` (sqlite-Store, `-tags=devcert`,
@@ -67,7 +74,8 @@ Teil B „Flow-Receiver" noch nicht gebaut).
   (brauchen Docker-Hub bzw. warmed-mysql — dieselbe Fork-Limitation); sqlite
   deckt dieselben Tests ab.
 - Deployment getting-started: `NETBIRD_SERVER_IMAGE=
-  ghcr.io/ahlner/netbird-server:latest` (bzw. `image:` in der compose).
+  ghcr.io/ahlner/netbird-server:latest` (bzw. `image:` in der compose); zum
+  Pinnen eine `<version>` setzen (z. B. `0.78.1-fork-1`).
 - Paket-Sichtbarkeit: ghcr-Pakete sind initial privat; beim ersten Lauf
   erzeugt, Sichtbarkeit ggf. unter Package-Settings auf public stellen oder
   Client mit PAT bei `ghcr.io` einloggen.

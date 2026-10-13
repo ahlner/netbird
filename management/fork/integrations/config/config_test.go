@@ -24,6 +24,30 @@ func enabledFlowSettings() FlowSettings {
 	}
 }
 
+func TestExtendConfig_NilConfig(t *testing.T) {
+	flowEnabled := &types.ExtraSettings{FlowEnabled: true}
+
+	tests := []struct {
+		name          string
+		settings      FlowSettings
+		peerGroups    []string
+		extraSettings *types.ExtraSettings
+	}{
+		{"flow enabled for group member", enabledFlowSettings(), []string{"grp-flow"}, flowEnabled},
+		{"pipeline disabled", FlowSettings{}, []string{"grp-flow"}, flowEnabled},
+		{"nil extra settings", enabledFlowSettings(), []string{"grp-flow"}, nil},
+		{"account flow flag off", enabledFlowSettings(), []string{"grp-flow"}, &types.ExtraSettings{}},
+		{"peer in no flow group", enabledFlowSettings(), []string{"other"}, flowEnabled},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := extendConfig(tt.settings, "peer-1", tt.peerGroups, nil, tt.extraSettings)
+			assert.Nil(t, cfg, "network map updates without a config must preserve nil")
+		})
+	}
+}
+
 func TestExtendConfig_PassThroughCases(t *testing.T) {
 	flowEnabled := &types.ExtraSettings{FlowEnabled: true}
 

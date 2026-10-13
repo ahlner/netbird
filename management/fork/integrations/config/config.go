@@ -16,6 +16,9 @@ func ExtendNetBirdConfig(peerID string, peerGroups []string, config *proto.Netbi
 }
 
 func extendConfig(settings FlowSettings, peerID string, peerGroups []string, config *proto.NetbirdConfig, extraSettings *types.ExtraSettings) *proto.NetbirdConfig {
+	if config == nil {
+		return nil
+	}
 	if !settings.Enabled || extraSettings == nil || !extraSettings.FlowEnabled {
 		return config
 	}

@@ -82,7 +82,7 @@ Teil B „Flow-Receiver" noch nicht gebaut).
 - Arm64 wäre möglich (`platforms` erweitern), ist wegen CGO unter QEMU aber
   langsam — Server-typisch amd64.
 
-## Wartung (Upstream-Rebase)
+## Wartung (Upstream-Übernahme per Merge)
 
 1. `git fetch upstream && git merge upstream/main` (Fork-main ist Merge-basiert,
   PR #1-Verlauf bleibt erhalten).
@@ -90,10 +90,23 @@ Teil B „Flow-Receiver" noch nicht gebaut).
    der Root-`go.mod`; `management/fork/integrations/` kompiliert gegen geänderte
    Upstream-API der Integrations-Schnittstelle (brechen laut statt still,
    Dateilayout ist gespiegelt).
-3. Docker-Images: `management/Dockerfile.fork`, `combined/Dockerfile.fork` und
+3. In der Repository-Wurzel `go mod tidy` ausführen und den Diff von `go.mod`
+   und `go.sum` prüfen. Das lokale `replace` kann Prüfsummen des entfernten
+   Integrationsmoduls überflüssig machen. Bereinigungen mit aufnehmen;
+   unerwartete Abhängigkeitsänderungen vor dem Commit klären. Die CI erwartet
+   nach `go mod tidy` einen unveränderten Arbeitsbaum.
+4. Fork-Regressionstests im separaten Integrationsmodul ausführen:
+   `go test -race -tags devcert ./config -count=1` aus
+   `management/fork/integrations/`. Insbesondere muss
+   `TestExtendConfig_NilConfig` bestehen: Network-Map-Updates dürfen die globale
+   Konfiguration weglassen; die Flow-Erweiterung muss `nil` zurückgeben, ohne Panic
+   oder eine leere Ersatzkonfiguration zu erzeugen. Auch die bestehenden Tests
+   mit gesetzter Konfiguration müssen bestehen.
+5. Docker-Images: `management/Dockerfile.fork`, `combined/Dockerfile.fork` und
    `fork-images.yml` sind reine Fork-Dateien ohne Upstream-Kollision; nach
    Upstream-Änderungen an `management/Dockerfile.multistage` oder
    `combined/Dockerfile.multistage` (Go-Version, Build-Flags, Base-Image)
    parallel pflegen.
-4. Verifikation pro Änderung wie im jeweiligen Abschnitt; danach
-   `git push origin main`.
+6. Verifikation pro Änderung wie im jeweiligen Abschnitt; danach
+   `git push origin main`. Anschließend CI und Fork-Image-Builds prüfen;
+   fehlgeschlagene oder noch laufende Checks ausdrücklich festhalten.

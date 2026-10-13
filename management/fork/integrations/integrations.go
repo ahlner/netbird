@@ -1,7 +1,8 @@
-// Package integrations mirrors the upstream management-integrations module 1:1
+// Package integrations mirrors the upstream management-integrations module
 // and adds the flow logger wiring on top. Surface changes upstream must fail
-// loudly at compile time rather than silently changing behavior, so every
-// exported symbol of the original module is kept with an identical signature.
+// loudly at compile time rather than silently changing behavior, so exported
+// symbols of the original module are kept with identical signatures. Upstream
+// removed the port forwarding interface in #8062, so this fork drops it too.
 package integrations
 
 import (
@@ -22,7 +23,6 @@ import (
 	"github.com/netbirdio/netbird/management/server/activity"
 	activitystore "github.com/netbirdio/netbird/management/server/activity/store"
 	"github.com/netbirdio/netbird/management/server/integrations/integrated_validator"
-	"github.com/netbirdio/netbird/management/server/integrations/port_forwarding"
 	"github.com/netbirdio/netbird/management/server/permissions"
 	"github.com/netbirdio/netbird/management/server/settings"
 )
@@ -30,6 +30,8 @@ import (
 // RegisterHandlers registers extra HTTP handlers of the closed-source
 // integrations on the API router. As in the original module this is a no-op;
 // the flow receiver is a separate process and needs no management endpoints.
+// Upstream dropped the proxy controller argument when it removed ingress
+// ports (#8062); this fork mirrors the reduced signature.
 func RegisterHandlers(
 	ctx context.Context,
 	prefix string,
@@ -39,7 +41,6 @@ func RegisterHandlers(
 	meter metric.Meter,
 	permissionsManager permissions.Manager,
 	peersManager peers.Manager,
-	proxyController port_forwarding.Controller,
 	settingsManager settings.Manager,
 ) (*mux.Router, error) {
 	return router, nil

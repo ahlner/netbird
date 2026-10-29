@@ -38,8 +38,6 @@ require (
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/coreos/go-oidc/v3 v3.18.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
-	github.com/dexidp/dex v2.13.0+incompatible // indirect
-	github.com/dexidp/dex/api/v2 v2.4.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/docker v28.0.1+incompatible // indirect
@@ -108,6 +106,8 @@ require (
 	github.com/moby/term v0.5.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/netbirdio/dex v0.244.1-0.20261021152327-0319b501f1a6 // indirect
+	github.com/netbirdio/dex/api/v2 v2.0.0-20261021115841-9f3e6d4c2ce3 // indirect
 	github.com/oapi-codegen/runtime v1.1.2 // indirect
 	github.com/okta/okta-sdk-golang/v2 v2.18.0 // indirect
 	github.com/openbao/openbao/api/v2 v2.5.1 // indirect
@@ -133,7 +133,6 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/testcontainers/testcontainers-go v0.37.0 // indirect
-	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0 // indirect
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0 // indirect
 	github.com/testcontainers/testcontainers-go/modules/redis v0.37.0 // indirect
 	github.com/tinylib/msgp v1.6.3 // indirect
@@ -170,7 +169,6 @@ require (
 	google.golang.org/grpc v1.80.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.5.7 // indirect
 	gorm.io/driver/postgres v1.5.7 // indirect
 	gorm.io/driver/sqlite v1.5.7 // indirect
 	gorm.io/gorm v1.25.12 // indirect
